@@ -54,4 +54,19 @@ public class Movimentacao {
 
     @ColumnInfo(name = "Observacao")
     public String observacao;
+
+    public Movimentacao(int idMaterial, int usuarioId, int quantidade, String entradaOuSaida, double custoTotal, String observacao) {
+
+        this.dataCriacao = new Date();
+        this.idMaterial = idMaterial;
+        this.usuarioId = usuarioId;
+        this.quantidade = quantidade;
+        this.entradaOuSaida = entradaOuSaida;
+        this.custoTotal = custoTotal;
+        this.dataMovimentacao = new Date();
+        this.observacao = observacao;
+    }
+
+    public Movimentacao() {
+    }
 }

@@ -21,7 +21,14 @@ public interface EstoqueDao {
 
     @Query("SELECT * FROM Estoque")
     List<Estoque> getAllEstoque();
- 
+
     @Query("SELECT * FROM Estoque WHERE IdMaterial = :materialId LIMIT 1")
     Estoque getEstoquePorMaterialId(int materialId);
+
+    @Query("UPDATE Estoque SET quantidade = quantidade - :quantidadeMovimentada where IdMaterial = :idMaterial and PosicaoEstoque = :posicaoEstoque")
+    void baixarMaterialEstoque(int quantidadeMovimentada, int idMaterial, String posicaoEstoque);
+
+    @Query("UPDATE Estoque SET quantidade = quantidade + :quantidadeMovimentada where IdMaterial = :idMaterial and PosicaoEstoque = :posicaoEstoque")
+    void entradaMaterialEstoque(int quantidadeMovimentada, int idMaterial, String posicaoEstoque);
+
 }
