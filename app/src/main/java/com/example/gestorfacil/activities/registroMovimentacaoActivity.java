@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.gestorfacil.R;
 import com.example.gestorfacil.database.AppDatabase;
+import com.example.gestorfacil.database.Estoque;
 import com.example.gestorfacil.database.Material;
 import com.example.gestorfacil.database.Movimentacao;
 
@@ -65,7 +66,7 @@ public class registroMovimentacaoActivity extends AppCompatActivity {
 
             }
 
-            realizarMovimentacao(produto, posicaoEstoque, quantidadeMovimentada, observacao, entradaSaida);
+            realizarMovimentacaoEstoque(produto, posicaoEstoque, quantidadeMovimentada, observacao, entradaSaida);
 
         });
 
@@ -117,6 +118,32 @@ public class registroMovimentacaoActivity extends AppCompatActivity {
             }).start();
 
         }
+
+    }
+
+    private void realizarMovimentacaoEstoque(String idProduto, String posicaoEstoque, String quantidadeMovimentada, String observacao, String entradaSaida){
+
+        new Thread(() ->{
+
+            boolean existeProdutoPosicaoEstoque = db.estoqueDao().checkProdutoPosicao(Integer.parseInt(idProduto), posicaoEstoque);
+
+            runOnUiThread(() ->{
+
+                if(existeProdutoPosicaoEstoque){
+
+                    realizarMovimentacao(idProduto, posicaoEstoque, quantidadeMovimentada, observacao, entradaSaida);
+                    realizarBaixaEstoque(idProduto, entradaSaida, quantidadeMovimentada, posicaoEstoque);
+                    finish();
+
+                }else{
+
+                    Toast.makeText(registroMovimentacaoActivity.this, "Produto nao existe nessa posicao", Toast.LENGTH_SHORT).show();
+
+                }
+
+            });
+
+        }).start();
 
     }
 

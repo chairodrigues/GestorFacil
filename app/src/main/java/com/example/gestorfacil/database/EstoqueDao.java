@@ -31,4 +31,7 @@ public interface EstoqueDao {
     @Query("UPDATE Estoque SET quantidade = quantidade + :quantidadeMovimentada where IdMaterial = :idMaterial and PosicaoEstoque = :posicaoEstoque")
     void entradaMaterialEstoque(int quantidadeMovimentada, int idMaterial, String posicaoEstoque);
 
+    @Query("SELECT * from Estoque where IdMaterial = :idProduto and PosicaoEstoque = :posicaoEstoque")
+    boolean checkProdutoPosicao(int idProduto, String posicaoEstoque);
+
 }
