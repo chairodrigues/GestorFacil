@@ -6,6 +6,8 @@ import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.gestorfacil.R;
+
 public class IntegrantesActivity extends AppCompatActivity {
 
     private ListView listViewIntegrantes;

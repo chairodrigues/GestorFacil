@@ -35,5 +35,53 @@ public class Estoque {
     public double valorTotal;  
 
     @ColumnInfo(name = "DataAtualizacao")
-    public Date dataAtualizacao;  
+    public Date dataAtualizacao;
+
+    public int getId() {
+        return Id;
+    }
+
+    public String getPosicaoEstoque() {
+        return posicaoEstoque;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public int getIdMaterial() {
+        return idMaterial;
+    }
+
+    public double getValorTotal() {
+        return valorTotal;
+    }
+
+    public Date getDataAtualizacao() {
+        return dataAtualizacao;
+    }
+
+    public void setId(int id) {
+        Id = id;
+    }
+
+    public void setPosicaoEstoque(String posicaoEstoque) {
+        this.posicaoEstoque = posicaoEstoque;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
+
+    public void setIdMaterial(int idMaterial) {
+        this.idMaterial = idMaterial;
+    }
+
+    public void setValorTotal(double valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
+    public void setDataAtualizacao(Date dataAtualizacao) {
+        this.dataAtualizacao = dataAtualizacao;
+    }
 }

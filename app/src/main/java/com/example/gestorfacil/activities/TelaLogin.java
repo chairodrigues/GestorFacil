@@ -1,3 +1,5 @@
+package com.example.gestorfacil.activities;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,9 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-package com.example.gestorfacil.activities;
-
-
+import com.example.gestorfacil.database.AppDatabase;
+import com.example.gestorfacil.database.Usuario;
 
 /**
  * Tela de login simples programática.
@@ -33,10 +34,15 @@ public class TelaLogin extends AppCompatActivity {
     private EditText etPassword;
     private Button btnLogin;
     private Button btnRegisterUser;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        db = AppDatabase.getDatabase(getApplicationContext());
+
+        //cadastrarUsuario();
 
         // Layout principal (vertical)
         LinearLayout root = new LinearLayout(this);
@@ -84,7 +90,22 @@ public class TelaLogin extends AppCompatActivity {
 
         // Eventos
         btnRegisterUser.setOnClickListener(v -> registerUser());
-        btnLogin.setOnClickListener(v -> attemptLogin());
+        btnLogin.setOnClickListener(v -> {
+
+            String email = etEmail.getText().toString();
+            String senha = etPassword.getText().toString();
+
+
+            if(email.isEmpty() || senha.isEmpty()) {
+
+                Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+                return;
+
+            }
+
+            realizarLogin(email, senha);
+
+        });
     }
 
     private void registerUser() {
@@ -105,37 +126,30 @@ public class TelaLogin extends AppCompatActivity {
         toast("Usuário cadastrado localmente. Use Entrar para acessar.");
     }
 
-    private void attemptLogin() {
-        String email = etEmail.getText().toString().trim();
-        String pass = etPassword.getText().toString();
+    private void realizarLogin(String email, String senha){
 
-        if (email.isEmpty() || pass.isEmpty()) {
-            toast("Preencha e-mail e senha.");
-            return;
-        }
+        new Thread(() -> {
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String storedEmail = prefs.getString(PREF_EMAIL, null);
-        String storedPass = prefs.getString(PREF_PASS, null);
+            Usuario usuarioEncontrado = db.usuarioDao().checkLogin(email, senha);
 
-        if (storedEmail == null || storedPass == null) {
-            toast("Nenhum usuário cadastrado. Cadastre-se primeiro.");
-            return;
-        }
+            runOnUiThread(() -> {
 
-        if (email.equals(storedEmail) && pass.equals(storedPass)) {
-            toast("Login bem-sucedido!");
-            // Abrir tela de cadastro de produtos (crie essa activity: TelaCadastroProduto)
-            try {
-                Intent it = new Intent(this, Class.forName("com.example.gestorfacil.activities.TelaCadastroProduto"));
-                startActivity(it);
-            } catch (ClassNotFoundException e) {
-                // Se a activity não existir ainda, informar ao desenvolvedor/usuário
-                toast("TelaCadastroProduto não encontrada. Crie a Activity de cadastro de produtos.");
-            }
-        } else {
-            toast("E-mail ou senha inválidos.");
-        }
+                if(usuarioEncontrado != null){
+
+                    Intent intent = new Intent(TelaLogin.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }else{
+
+                    Toast.makeText(TelaLogin.this, "Email ou senha invalidos", Toast.LENGTH_SHORT).show();
+
+                }
+
+            });
+
+        }).start();
+
     }
 
     private void toast(String msg) {
@@ -152,5 +166,29 @@ public class TelaLogin extends AppCompatActivity {
     private int dp(int value) {
         float scale = getResources().getDisplayMetrics().density;
         return (int) (value * scale + 0.5f);
+    }
+
+    private void cadastrarUsuario(){
+
+        String nome, email, senha;
+
+        nome = "admin";
+        email = "admin@gmail.com";
+        senha = "admin";
+
+        Usuario admin = new Usuario(nome, email, senha);
+
+        new Thread(() ->{
+
+            db.usuarioDao().insert(admin);
+
+            runOnUiThread(() ->{
+
+                Toast.makeText(this, "Primeiro usuario cadastrado", Toast.LENGTH_SHORT).show();
+
+            });
+
+        }).start();
+
     }
 }

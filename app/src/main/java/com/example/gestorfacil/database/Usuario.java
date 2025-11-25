@@ -26,5 +26,16 @@ public class Usuario {
     public Date dataCriacao;  
 
     @ColumnInfo(name = "Tipo")
-    public String tipo;  
+    public String tipo;
+
+    public Usuario(String nome, String email, String senha) {
+
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+        this.dataCriacao = new Date();
+    }
+
+    public Usuario() {
+    }
 }

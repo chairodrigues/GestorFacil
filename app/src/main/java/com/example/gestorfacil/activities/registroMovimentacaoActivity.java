@@ -27,16 +27,13 @@ public class registroMovimentacaoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movimentacao);
 
-        editProduto = findViewById();
+        /**editProduto = findViewById();
         editPosicaoEstoque = findViewById();
         editQuantidadeMovimentada = findViewById();
-        editObservacao = findViewById();
+        editObservacao = findViewById();**/
 
-        btnSaida = findViewById();
-        btnEntrada = findViewById();
-
-        btnEntrada = findViewById();
-        btnSaida = findViewById();
+        btnSaida = findViewById(R.id.btnEntrada);
+        btnEntrada = findViewById(R.id.btnSaida);
 
         db = AppDatabase.getDatabase(getApplicationContext());
 
@@ -54,10 +51,15 @@ public class registroMovimentacaoActivity extends AppCompatActivity {
 
         btnRegistrar.setOnClickListener(v -> {
 
-            String produto = editProduto.getText().toString();
+            /**String produto = editProduto.getText().toString();
             String posicaoEstoque = editPosicaoEstoque.getText().toString();
             String quantidadeMovimentada = editQuantidadeMovimentada.getText().toString();
-            String observacao = editObservacao.getText().toString();
+            String observacao = editObservacao.getText().toString();**/
+
+            String produto = "1";
+            String posicaoEstoque = "teste";
+            String quantidadeMovimentada = "1";
+            String observacao = "teste";
 
             if(produto.isEmpty() || posicaoEstoque.isEmpty() || quantidadeMovimentada.isEmpty() || entradaSaida.isEmpty()){
 

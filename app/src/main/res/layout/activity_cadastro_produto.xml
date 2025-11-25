@@ -4,4 +4,63 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <EditText
+        android:id="@+id/txNomeProduto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Nome do produto"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/txDescProduto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Descricao do produto"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/txTipoProduto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Tipo do produto"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/txCusto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Custo"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txMedidaProduto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Medida do produto"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/txEstoqueMinimo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Estoque"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/btnCadastrar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cadastrar" />
+
+    <Button
+        android:id="@+id/btnCancelar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancelar" />
 </LinearLayout>

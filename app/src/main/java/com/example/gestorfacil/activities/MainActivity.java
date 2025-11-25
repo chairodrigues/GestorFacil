@@ -28,13 +28,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Aqui deve vir o ID dos componentes -Felipe
-        btnCadastroProduto = findViewById();
+        btnCadastroProduto = findViewById(R.id.btnCadastrarProduto);
 
         btnCadastroProduto.setOnClickListener( v -> {
 
             Intent intent = new Intent(MainActivity.this, cadastroProdutoActivity.class);
             startActivity(intent);
-            finish();
+            //finish();
+
+        });
+
+        btnRegistroMovimentacao = findViewById(R.id.btnRegistrarMovimentacao);
+
+        btnRegistroMovimentacao.setOnClickListener(v -> {
+
+            Intent intent = new Intent(MainActivity.this, Movimentacao.class);
+            startActivity(intent);
+
+        });
+
+        btnEstoque = findViewById(R.id.btnEstoque);
+
+        btnEstoque.setOnClickListener(v -> {
+
+            Intent intent = new Intent(MainActivity.this, consultarEstoque.class);
+            startActivity(intent);
 
         });
 

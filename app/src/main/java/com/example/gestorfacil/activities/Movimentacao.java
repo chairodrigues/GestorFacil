@@ -1,3 +1,5 @@
+package com.example.gestorfacil.activities;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -15,12 +17,14 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.gestorfacil.database.AppDatabase;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-
-package com.example.gestorfacil.activities;
 
 public class Movimentacao extends AppCompatActivity {
 
@@ -32,12 +36,15 @@ public class Movimentacao extends AppCompatActivity {
     private EditText observacaoEditText;
     private Button salvarButton;
     private Button adicionarProdutoButton;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         dbHelper = new MovimentosDbHelper(this);
+
+        db = AppDatabase.getDatabase(getApplicationContext());
 
         // Criar layout básico programaticamente para facilitar integração
         LinearLayout root = new LinearLayout(this);
@@ -178,12 +185,32 @@ public class Movimentacao extends AppCompatActivity {
     }
 
     private void refreshProdutoSpinner() {
-        ArrayList<String> nomes = dbHelper.getTodosNomesProdutos();
-        if (nomes.isEmpty()) {
-            nomes.add("Sem produtos cadastrados");
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, nomes);
-        produtoSpinner.setAdapter(adapter);
+
+        new Thread(() -> {
+
+            List<String> nomesBD = db.materialDao().getNomesMaterial();
+
+            ArrayList<String> listaNomes = new ArrayList<>();
+
+            if (nomesBD.isEmpty()) {
+
+                listaNomes.add("Sem produtos cadastrados");
+
+            }else{
+
+                listaNomes.addAll(nomesBD);
+
+            }
+
+            runOnUiThread(() -> {
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, listaNomes);
+                produtoSpinner.setAdapter(adapter);
+
+            });
+
+        }).start();
+
     }
 
     private void selectProdutoInSpinner(String nome) {
