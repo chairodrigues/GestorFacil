@@ -14,7 +14,7 @@ import com.example.gestorfacil.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnCadastroProduto, btnRegistroMovimentacao, btnEstoque, btnIndicadores, btnCriacaoUsuario;
+    private Button btnCadastroProduto, btnRegistroMovimentacao, btnEstoque, btnIndicadores, btnCriacaoUsuario, btnIntegrantes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +52,15 @@ public class MainActivity extends AppCompatActivity {
         btnEstoque.setOnClickListener(v -> {
 
             Intent intent = new Intent(MainActivity.this, consultarEstoque.class);
+            startActivity(intent);
+
+        });
+
+        btnIntegrantes = findViewById(R.id.btnIntegrantes);
+
+        btnIntegrantes.setOnClickListener(v -> {
+
+            Intent intent = new Intent(MainActivity.this, IntegrantesActivity.class);
             startActivity(intent);
 
         });
