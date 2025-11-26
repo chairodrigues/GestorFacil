@@ -46,4 +46,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnEstoque" />
+
+    <Button
+        android:id="@+id/btnEstatistica"
+        android:layout_width="265dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="32dp"
+        android:text="Estatistica"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnIntegrantes" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

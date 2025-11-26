@@ -42,6 +42,10 @@
             android:name=".activities.IntegrantesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".activities.EstatisticasActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

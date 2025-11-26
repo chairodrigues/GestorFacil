@@ -52,4 +52,7 @@ public interface EstoqueDao {
     @Query("UPDATE Estoque set ValorTotal = ValorTotal + :valorTotalProduto where Id = :idEstoque")
     void atualizarValorTotal(double valorTotalProduto, int idEstoque);
 
+    @Query("Select sum(ValorTotal) from Estoque")
+    Double getValorTotalEstoque();
+
 }

@@ -19,4 +19,10 @@ public interface MovimentacaoDao {
 
     @Query("Delete from Movimentacao where IdMovimentacao = :id")
     void deletarId(int id);
+
+    @Query("Select sum(Quantidade) from Movimentacao where EntradaOuSaida = 'Entrada'")
+    Double getTotalEntradas();
+
+    @Query("Select sum(Quantidade) from Movimentacao where EntradaOuSaida = 'Saída'")
+    Double getTotalSaidas();
 }

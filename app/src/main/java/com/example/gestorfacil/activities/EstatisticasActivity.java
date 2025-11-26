@@ -12,26 +12,30 @@ import java.text.NumberFormat;
 
 public class EstatisticasActivity extends AppCompatActivity {
 
-    private TextView txtTotalEstoque, txtTotalProdutos, txtTotalMovimentacoes;
+    private TextView txtTotalEstoque, txtTotalProdutos, txtTotalMovimentacoes, txEntrada, txSaida, txDiferenca, txValorTotal;
+    private String totalEntradas;
+    private Double valorTotal;
 
-    private AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_estatisticas);
 
+        db = AppDatabase.getDatabase(getApplicationContext());
+
         txtTotalEstoque = findViewById(R.id.txtTotalEstoque);
         txtTotalProdutos = findViewById(R.id.txtTotalProdutos);
         txtTotalMovimentacoes = findViewById(R.id.txtTotalMovimentacoes);
 
-        //atualizarEstatisticas();
+        atualizarEstatistica();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //atualizarEstatisticas();
+        atualizarEstatistica();
     }
 
     /**private void atualizarEstatisticas() {
@@ -54,4 +58,30 @@ public class EstatisticasActivity extends AppCompatActivity {
         txtTotalProdutos.setText("Total de produtos cadastrados: " + totalProdutos);
         txtTotalMovimentacoes.setText("Movimentações registradas: " + totalMovimentacoes);
     }**/
+
+    private void atualizarEstatistica(){
+
+        new Thread(() -> {
+
+            txEntrada = findViewById(R.id.txEntrada);
+
+            txEntrada.setText(String.valueOf(db.movimentacaoDao().getTotalEntradas()));
+
+            txSaida = findViewById(R.id.txSaida);
+
+            txSaida.setText(String.valueOf(db.movimentacaoDao().getTotalSaidas()));
+
+            txDiferenca = findViewById(R.id.txDiferenca);
+
+            valorTotal = db.movimentacaoDao().getTotalEntradas() - db.movimentacaoDao().getTotalSaidas();
+
+            txDiferenca.setText(String.valueOf(valorTotal));
+
+            txValorTotal = findViewById(R.id.txValorTotal);
+
+            txValorTotal.setText(String.valueOf(db.estoqueDao().getValorTotalEstoque()));
+
+        }).start();
+
+    }
 }

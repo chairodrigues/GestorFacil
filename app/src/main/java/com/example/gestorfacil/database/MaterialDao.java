@@ -33,4 +33,6 @@ public interface MaterialDao {
 
     @Query("SELECT CustoUnitario FROM Material WHERE IdMaterial = :id")
     Double getCustoMaterial(int id);
+
+
 }
