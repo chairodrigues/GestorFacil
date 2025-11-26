@@ -16,7 +16,7 @@ import java.util.List;
 public class consultarEstoque extends AppCompatActivity {
 
     private ListView listViewEstoque;
-    private AppDatabase  db = AppDatabase.getDatabase(getApplicationContext());
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,20 +25,35 @@ public class consultarEstoque extends AppCompatActivity {
 
         listViewEstoque = findViewById(R.id.listViewEstoque);
 
-        List<String> linhas = new ArrayList<>();
-        for (Estoque p : db.estoqueDao().getAllEstoque()) {
-            String status;
-            if (p.getQuantidade() == 0) status = "ESGOTADO";
-            else if (p.getQuantidade() <= 5) status = "BAIXO ESTOQUE";
-            else status = "NORMAL";
+        // inicializa o banco aqui
+        db = AppDatabase.getDatabase(getApplicationContext());
 
-            String linha = p.getIdMaterial() + " - Qtd: " + p.getQuantidade() +
-                    " (" + status + ")";
-            linhas.add(linha);
-        }
+        // busca os dados em background e atualiza a UI na thread principal
+        new Thread(() -> {
+            List<String> linhas = new ArrayList<>();
+            List<Estoque> estoqueList = db.estoqueDao().getAllEstoque();
+            if (estoqueList != null) {
+                for (Estoque p : estoqueList) {
+                    String status;
+                    if (p.getQuantidade() == 0) status = "ESGOTADO";
+                    else if (p.getQuantidade() <= 5) status = "BAIXO ESTOQUE";
+                    else status = "NORMAL";
 
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, linhas);
-        listViewEstoque.setAdapter(adapter);
+                    String linha = p.getIdMaterial() + " - Qtd: " + p.getQuantidade() +
+                            " (" + status + ")";
+                    linhas.add(linha);
+                }
+            }
+
+            if (linhas.isEmpty()) {
+                linhas.add("Sem itens em estoque");
+            }
+
+            runOnUiThread(() -> {
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<>(consultarEstoque.this, android.R.layout.simple_list_item_1, linhas);
+                listViewEstoque.setAdapter(adapter);
+            });
+        }).start();
     }
 }
