@@ -23,18 +23,9 @@ public class loginActivity  extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Aqui deve vir o ID dos componentes - Felipe
-        /**editEmail = findViewById();
-        editSenha = findViewById();
-        btnEntrar = findViewById();**/
-
-
         db = AppDatabase.getDatabase(getApplicationContext());
 
         btnEntrar.setOnClickListener(v -> {
-
-            /**String email = editEmail.getText().toString();
-            String senha = editSenha.getText().toString();**/
 
             String email = "teste";
             String senha = "teste";

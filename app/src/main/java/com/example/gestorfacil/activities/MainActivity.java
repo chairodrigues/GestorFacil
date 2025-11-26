@@ -27,14 +27,12 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        //Aqui deve vir o ID dos componentes -Felipe
         btnCadastroProduto = findViewById(R.id.btnCadastrarProduto);
 
         btnCadastroProduto.setOnClickListener( v -> {
 
             Intent intent = new Intent(MainActivity.this, cadastroProdutoActivity.class);
             startActivity(intent);
-            //finish();
 
         });
 

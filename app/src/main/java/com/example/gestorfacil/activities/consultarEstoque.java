@@ -25,10 +25,8 @@ public class consultarEstoque extends AppCompatActivity {
 
         listViewEstoque = findViewById(R.id.listViewEstoque);
 
-        // inicializa o banco aqui
         db = AppDatabase.getDatabase(getApplicationContext());
 
-        // busca os dados em background e atualiza a UI na thread principal
         new Thread(() -> {
             List<String> linhas = new ArrayList<>();
             List<Estoque> estoqueList = db.estoqueDao().getAllEstoque();

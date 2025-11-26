@@ -30,4 +30,7 @@ public interface UsuarioDao {
 
     @Query("Select * from Usuario where email = :email and senha = :senha")
     Usuario checkLogin(String email, String senha);
+
+    @Query("Select * from Usuario where email = :email and senha = :senha")
+    boolean checkLoginExiste(String email, String senha);
 }

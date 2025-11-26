@@ -42,9 +42,8 @@ public class TelaLogin extends AppCompatActivity {
 
         db = AppDatabase.getDatabase(getApplicationContext());
 
-        //cadastrarUsuario();
+        cadastrarUsuario();
 
-        // Layout principal (vertical)
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -53,7 +52,6 @@ public class TelaLogin extends AppCompatActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
-        // Título
         TextView tvTitle = new TextView(this);
         tvTitle.setText("Login - GestorFácil");
         tvTitle.setTextSize(22f);
@@ -64,31 +62,26 @@ public class TelaLogin extends AppCompatActivity {
         titleLp.setMargins(0, 0, 0, dp(16));
         root.addView(tvTitle, titleLp);
 
-        // Email
         etEmail = new EditText(this);
         etEmail.setHint("E-mail");
         etEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         root.addView(etEmail, formLp());
 
-        // Senha
         etPassword = new EditText(this);
         etPassword.setHint("Senha");
         etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         root.addView(etPassword, formLp());
 
-        // Botão Entrar
         btnLogin = new Button(this);
         btnLogin.setText("Entrar");
         root.addView(btnLogin, formLp());
 
-        // Botão Cadastrar Usuário (cria credenciais locais)
         btnRegisterUser = new Button(this);
         btnRegisterUser.setText("Cadastrar usuário");
         root.addView(btnRegisterUser, formLp());
 
         setContentView(root);
 
-        // Eventos
         btnRegisterUser.setOnClickListener(v -> registerUser());
         btnLogin.setOnClickListener(v -> {
 
@@ -180,13 +173,11 @@ public class TelaLogin extends AppCompatActivity {
 
         new Thread(() ->{
 
-            db.usuarioDao().insert(admin);
+            if(!db.usuarioDao().checkLoginExiste(email, senha)){
 
-            runOnUiThread(() ->{
+                db.usuarioDao().insert(admin);
 
-                Toast.makeText(this, "Primeiro usuario cadastrado", Toast.LENGTH_SHORT).show();
-
-            });
+            }
 
         }).start();
 

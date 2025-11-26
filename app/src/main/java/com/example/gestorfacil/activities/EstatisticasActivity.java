@@ -12,7 +12,7 @@ import java.text.NumberFormat;
 
 public class EstatisticasActivity extends AppCompatActivity {
 
-    private TextView txtTotalEstoque, txtTotalProdutos, txtTotalMovimentacoes, txEntrada, txSaida, txDiferenca, txValorTotal;
+    private TextView txEntrada, txSaida, txDiferenca, txValorTotal;
     private String totalEntradas;
     private Double valorTotal;
 
@@ -25,10 +25,6 @@ public class EstatisticasActivity extends AppCompatActivity {
 
         db = AppDatabase.getDatabase(getApplicationContext());
 
-        txtTotalEstoque = findViewById(R.id.txtTotalEstoque);
-        txtTotalProdutos = findViewById(R.id.txtTotalProdutos);
-        txtTotalMovimentacoes = findViewById(R.id.txtTotalMovimentacoes);
-
         atualizarEstatistica();
     }
 
@@ -38,48 +34,34 @@ public class EstatisticasActivity extends AppCompatActivity {
         atualizarEstatistica();
     }
 
-    /**private void atualizarEstatisticas() {
-
-        int totalEstoque = 0;
-        int totalProdutos = 0;
-        int totalMovimentacoes = 0;
-
-        if (db != null) {
-            // proteções contra possíveis retornos nulos
-            Integer q = repo.getQuantidadeTotalEstoque();
-            totalEstoque = q != null ? q : 0;
-
-            totalProdutos = repo.getProdutos() != null ? repo.getProdutos().size() : 0;
-            totalMovimentacoes = repo.getMovimentacoes() != null ? repo.getMovimentacoes().size() : 0;
-        }
-
-        NumberFormat nf = NumberFormat.getInstance();
-        txtTotalEstoque.setText("Quantidade total em estoque: " + nf.format(totalEstoque));
-        txtTotalProdutos.setText("Total de produtos cadastrados: " + totalProdutos);
-        txtTotalMovimentacoes.setText("Movimentações registradas: " + totalMovimentacoes);
-    }**/
-
     private void atualizarEstatistica(){
+
+        txEntrada = findViewById(R.id.txEntrada);
+        txSaida = findViewById(R.id.txSaida);
+        txDiferenca = findViewById(R.id.txDiferenca);
+        txValorTotal = findViewById(R.id.txValorTotal);
 
         new Thread(() -> {
 
-            txEntrada = findViewById(R.id.txEntrada);
+            Double entradaObj = db.movimentacaoDao().getTotalEntradas();
+            Double saidaObj = db.movimentacaoDao().getTotalSaidas();
+            Double estoqueObj = db.estoqueDao().getValorTotalEstoque();
 
-            txEntrada.setText(String.valueOf(db.movimentacaoDao().getTotalEntradas()));
+            double entrada = (entradaObj != null) ? entradaObj : 0.0;
+            double saida = (saidaObj != null) ? saidaObj : 0.0;
+            double totalEstoque = (estoqueObj != null) ? estoqueObj : 0.0;
 
-            txSaida = findViewById(R.id.txSaida);
+            double diferenca = entrada - saida;
 
-            txSaida.setText(String.valueOf(db.movimentacaoDao().getTotalSaidas()));
 
-            txDiferenca = findViewById(R.id.txDiferenca);
+            runOnUiThread(() ->{
 
-            valorTotal = db.movimentacaoDao().getTotalEntradas() - db.movimentacaoDao().getTotalSaidas();
+                txEntrada.setText(String.valueOf(entrada));
+                txSaida.setText(String.valueOf(saida));
+                txDiferenca.setText(String.valueOf(diferenca));
+                txValorTotal.setText(String.valueOf(totalEstoque));
 
-            txDiferenca.setText(String.valueOf(valorTotal));
-
-            txValorTotal = findViewById(R.id.txValorTotal);
-
-            txValorTotal.setText(String.valueOf(db.estoqueDao().getValorTotalEstoque()));
+            });
 
         }).start();
 

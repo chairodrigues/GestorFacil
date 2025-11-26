@@ -49,7 +49,6 @@ public class Movimentacao extends AppCompatActivity {
 
         db = AppDatabase.getDatabase(getApplicationContext());
 
-        // Criar layout básico programaticamente para facilitar integração
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         int pad = dpToPx(16);
@@ -71,8 +70,7 @@ public class Movimentacao extends AppCompatActivity {
                 Toast.makeText(this, "Informe o nome do produto.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Se produto não existir, cria com estoque 0
-            //long id = dbHelper.ensureProdutoExists(nome);
+
             refreshProdutoSpinner();
             selectProdutoInSpinner(nome);
             Toast.makeText(this, "Produto selecionado: " + nome, Toast.LENGTH_SHORT).show();
@@ -155,7 +153,7 @@ public class Movimentacao extends AppCompatActivity {
 
                     runOnUiThread(() -> {
 
-                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso!", Toast.LENGTH_SHORT).show();
                         finish();
 
                     });
@@ -175,7 +173,7 @@ public class Movimentacao extends AppCompatActivity {
 
                     runOnUiThread(() -> {
 
-                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso!", Toast.LENGTH_SHORT).show();
                         finish();
 
                     });
@@ -195,7 +193,7 @@ public class Movimentacao extends AppCompatActivity {
 
                     runOnUiThread(() -> {
 
-                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso!", Toast.LENGTH_SHORT).show();
                         finish();
 
                     });
@@ -249,7 +247,7 @@ public class Movimentacao extends AppCompatActivity {
     }
 
     private String getSelectedProdutoName() {
-        // Retorna o valor do spinner (se tiver seleção) ou do campo livre
+
         String manual = produtoEditText.getText().toString().trim();
         if (!manual.isEmpty()) return manual;
         Object sel = produtoSpinner.getSelectedItem();
