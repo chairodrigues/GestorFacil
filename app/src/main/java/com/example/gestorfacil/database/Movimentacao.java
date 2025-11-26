@@ -31,6 +31,7 @@ public class Movimentacao {
     @PrimaryKey(autoGenerate = true)
     public int IdMovimentacao;
 
+
     @ColumnInfo(name = "DataCriacao")
     public Date dataCriacao;
 

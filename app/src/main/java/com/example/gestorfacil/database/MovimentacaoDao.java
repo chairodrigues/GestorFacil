@@ -16,4 +16,7 @@ public interface MovimentacaoDao {
  
     @Query("SELECT * FROM Movimentacao WHERE IdMaterial = :materialId ORDER BY DataMovimentacao DESC")
     List<Movimentacao> getMovimentacoesPorMaterial(int materialId);
+
+    @Query("Delete from Movimentacao where IdMovimentacao = :id")
+    void deletarId(int id);
 }

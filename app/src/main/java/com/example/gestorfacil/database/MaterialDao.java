@@ -30,4 +30,7 @@ public interface MaterialDao {
 
     @Query("SELECT * FROM Material WHERE IdMaterial = :id")
     Material getMaterialById(int id);
+
+    @Query("SELECT CustoUnitario FROM Material WHERE IdMaterial = :id")
+    Double getCustoMaterial(int id);
 }

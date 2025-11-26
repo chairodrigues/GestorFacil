@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.gestorfacil.database.AppDatabase;
+import com.example.gestorfacil.database.Estoque;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,21 +30,22 @@ import java.util.Locale;
 
 public class Movimentacao extends AppCompatActivity {
 
-    private MovimentosDbHelper dbHelper;
-    private Spinner tipoSpinner;
-    private Spinner produtoSpinner;
+    private Spinner produtoSpinner, posicaoSpinner, tipoSpinner;
     private EditText produtoEditText;
     private EditText quantidadeEditText;
     private EditText observacaoEditText;
     private Button salvarButton;
     private Button adicionarProdutoButton;
     private AppDatabase db;
+    private int idSelecionado, quantidadeProduto;
+    private String posicaoEstoque, entradaSaida, observacao;
+    private Estoque novoEstoque;
+    private com.example.gestorfacil.database.Movimentacao novaMovimentacao;
+    private double custoMaterialUnitario, custoMaterialTotal;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        dbHelper = new MovimentosDbHelper(this);
 
         db = AppDatabase.getDatabase(getApplicationContext());
 
@@ -69,7 +72,7 @@ public class Movimentacao extends AppCompatActivity {
                 return;
             }
             // Se produto não existir, cria com estoque 0
-            long id = dbHelper.ensureProdutoExists(nome);
+            //long id = dbHelper.ensureProdutoExists(nome);
             refreshProdutoSpinner();
             selectProdutoInSpinner(nome);
             Toast.makeText(this, "Produto selecionado: " + nome, Toast.LENGTH_SHORT).show();
@@ -80,6 +83,16 @@ public class Movimentacao extends AppCompatActivity {
         tipos.add("Entrada");
         tipos.add("Saída");
         tipoSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, tipos));
+
+        posicaoSpinner = new Spinner(this);
+        ArrayList<String> posicoes = new ArrayList<>();
+        posicoes.add("1A");
+        posicoes.add("2A");
+        posicoes.add("3A");
+        posicoes.add("1B");
+        posicoes.add("2B");
+        posicoes.add("3B");
+        posicaoSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, posicoes));
 
         quantidadeEditText = new EditText(this);
         quantidadeEditText.setHint("Quantidade");
@@ -102,6 +115,8 @@ public class Movimentacao extends AppCompatActivity {
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(tipoSpinner,
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(posicaoSpinner,
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(quantidadeEditText,
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(observacaoEditText,
@@ -116,63 +131,121 @@ public class Movimentacao extends AppCompatActivity {
     }
 
     private void registrarMovimentacao() {
-        String produtoNome = getSelectedProdutoName();
-        if (produtoNome == null || produtoNome.trim().isEmpty()) {
-            Toast.makeText(this, "Selecione ou informe um produto.", Toast.LENGTH_SHORT).show();
-            return;
+        quantidadeProduto = Integer.parseInt(String.valueOf(quantidadeEditText.getText()));
+        posicaoEstoque = posicaoSpinner.getSelectedItem().toString();
+        entradaSaida = tipoSpinner.getSelectedItem().toString();
+        observacao = String.valueOf(observacaoEditText.getText());
+        selecionarIdProduto();
+
+        if(entradaSaida.equals("Entrada")){
+
+            new Thread(() ->{
+
+                if(db.estoqueDao().checkProdutoPosicao(idSelecionado, posicaoEstoque)){
+
+                    custoMaterialUnitario = db.materialDao().getCustoMaterial(idSelecionado);
+                    custoMaterialTotal = custoMaterialUnitario * quantidadeProduto;
+
+                    db.estoqueDao().entradaMaterialEstoque(quantidadeProduto, idSelecionado, posicaoEstoque);
+                    db.estoqueDao().atualizarValorTotal(custoMaterialTotal, db.estoqueDao().getIdPosicao(posicaoEstoque));
+
+                    novaMovimentacao = new com.example.gestorfacil.database.Movimentacao(idSelecionado, 1, quantidadeProduto, entradaSaida, custoMaterialTotal, observacao);
+
+                    db.movimentacaoDao().insert(novaMovimentacao);
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    });
+
+                }else if(!db.estoqueDao().checkPosicao(posicaoEstoque)){
+
+                    custoMaterialUnitario = db.materialDao().getCustoMaterial(idSelecionado);
+                    custoMaterialTotal = custoMaterialUnitario * quantidadeProduto;
+
+                    novoEstoque = new Estoque(posicaoEstoque, quantidadeProduto, idSelecionado, custoMaterialTotal);
+
+                    db.estoqueDao().insert(novoEstoque);
+
+                    novaMovimentacao = new com.example.gestorfacil.database.Movimentacao(idSelecionado, 1, quantidadeProduto, entradaSaida, custoMaterialTotal, observacao);
+
+                    db.movimentacaoDao().insert(novaMovimentacao);
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    });
+
+                }else if(db.estoqueDao().checkPosicaoLivre(posicaoEstoque)){
+
+                    custoMaterialUnitario = db.materialDao().getCustoMaterial(idSelecionado);
+                    custoMaterialTotal = custoMaterialUnitario * quantidadeProduto;
+
+                    novoEstoque = new Estoque(db.estoqueDao().getIdPosicao(posicaoEstoque),posicaoEstoque, quantidadeProduto, idSelecionado, custoMaterialTotal);
+
+                    db.estoqueDao().update(novoEstoque);
+
+                    novaMovimentacao = new com.example.gestorfacil.database.Movimentacao(idSelecionado, 1, quantidadeProduto, entradaSaida, custoMaterialTotal, observacao);
+
+                    db.movimentacaoDao().insert(novaMovimentacao);
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso! Material " + idSelecionado + " Posicao " + posicaoEstoque + " Quantidade " + quantidadeProduto , Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    });
+
+                }else{
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Houve um problema para realizar a movimentacao", Toast.LENGTH_SHORT).show();
+
+                    });
+
+                }
+
+            }).start();
+
+        }else{
+
+            new Thread(() ->{
+
+                if(db.estoqueDao().checkProdutoPosicaoQuantidade(idSelecionado, posicaoEstoque, quantidadeProduto)){
+
+                    db.estoqueDao().baixarMaterialEstoque(quantidadeProduto, idSelecionado, posicaoEstoque);
+
+                    novaMovimentacao = new com.example.gestorfacil.database.Movimentacao(idSelecionado, 1, quantidadeProduto, entradaSaida, custoMaterialTotal, observacao);
+
+                    db.movimentacaoDao().insert(novaMovimentacao);
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Movimentacao cadastrada com sucesso!", Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    });
+
+                }else {
+
+                    runOnUiThread(() -> {
+
+                        Toast.makeText(this, "Houve um problema para realizar a movimentacao!", Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    });
+
+                }
+
+            }).start();
+
         }
 
-        String tipo = tipoSpinner.getSelectedItem().toString();
-        String quantidadeStr = quantidadeEditText.getText().toString().trim();
-        if (quantidadeStr.isEmpty()) {
-            Toast.makeText(this, "Informe a quantidade.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int quantidade;
-        try {
-            quantidade = Integer.parseInt(quantidadeStr);
-            if (quantidade <= 0) {
-                Toast.makeText(this, "Quantidade deve ser positiva.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } catch (NumberFormatException ex) {
-            Toast.makeText(this, "Quantidade inválida.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String observacao = observacaoEditText.getText().toString().trim();
-        String data = nowAsIso();
-
-        // Garante que o produto exista
-        long produtoId = dbHelper.ensureProdutoExists(produtoNome);
-
-        // Verifica estoque atual se for saída
-        int estoqueAtual = dbHelper.getEstoque(produtoId);
-        if ("Saída".equalsIgnoreCase(tipo) && estoqueAtual < quantidade) {
-            Toast.makeText(this, "Estoque insuficiente. Atual: " + estoqueAtual, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Calcula novo estoque
-        int novoEstoque = estoqueAtual + ("Entrada".equalsIgnoreCase(tipo) ? quantidade : -quantidade);
-
-        boolean inserted = dbHelper.insertMovimentacao(produtoId, produtoNome, tipo, quantidade, data, observacao);
-        if (!inserted) {
-            Toast.makeText(this, "Erro ao registrar movimentação.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        boolean updated = dbHelper.updateEstoqueProduto(produtoId, novoEstoque);
-        if (!updated) {
-            Toast.makeText(this, "Movimentação registrada mas falha ao atualizar estoque.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        Toast.makeText(this, "Movimentação registrada com sucesso. Estoque agora: " + novoEstoque, Toast.LENGTH_LONG).show();
-        quantidadeEditText.setText("");
-        observacaoEditText.setText("");
-        refreshProdutoSpinner();
     }
 
     private String getSelectedProdutoName() {
@@ -219,121 +292,32 @@ public class Movimentacao extends AppCompatActivity {
             Object it = adapter.getItem(i);
             if (it != null && nome.equals(it.toString())) {
                 produtoSpinner.setSelection(i);
+                idSelecionado = i + 1;
+
+                Toast.makeText(this, idSelecionado, Toast.LENGTH_SHORT).show();
+
                 return;
             }
         }
     }
 
-    private String nowAsIso() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        return sdf.format(new Date());
+    private void selecionarIdProduto() {
+        ArrayAdapter adapter = (ArrayAdapter) produtoSpinner.getAdapter();
+        for (int i = 0; i < adapter.getCount(); i++) {
+            Object it = adapter.getItem(i);
+            if (it != null && produtoSpinner.getSelectedItem().equals(it.toString())) {
+                produtoSpinner.setSelection(i);
+                idSelecionado = i + 1;
+
+                return;
+            }
+        }
     }
+
 
     private int dpToPx(int dp) {
         float scale = getResources().getDisplayMetrics().density;
         return (int) (dp * scale + 0.5f);
     }
 
-    // SQLite helper interno simples
-    private static class MovimentosDbHelper extends SQLiteOpenHelper {
-
-        private static final String DB_NAME = "gestor.db";
-        private static final int DB_VERSION = 1;
-
-        MovimentosDbHelper(Context ctx) {
-            super(ctx, DB_NAME, null, DB_VERSION);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            // Tabela de produtos
-            db.execSQL("CREATE TABLE IF NOT EXISTS produtos (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "nome TEXT UNIQUE NOT NULL," +
-                    "estoque INTEGER NOT NULL DEFAULT 0" +
-                    ");");
-
-            // Tabela de movimentações
-            db.execSQL("CREATE TABLE IF NOT EXISTS movimentacoes (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "produto_id INTEGER," +
-                    "produto_nome TEXT," +
-                    "tipo TEXT," + // Entrada / Saída
-                    "quantidade INTEGER," +
-                    "data TEXT," +
-                    "observacao TEXT" +
-                    ");");
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            // No momento não há versão superior
-        }
-
-        long ensureProdutoExists(String nome) {
-            SQLiteDatabase db = getWritableDatabase();
-            // Tenta buscar
-            Cursor c = db.rawQuery("SELECT id FROM produtos WHERE nome = ?", new String[]{nome});
-            try {
-                if (c.moveToFirst()) {
-                    return c.getLong(0);
-                }
-            } finally {
-                c.close();
-            }
-            // Inserir novo produto com estoque 0
-            ContentValues cv = new ContentValues();
-            cv.put("nome", nome);
-            cv.put("estoque", 0);
-            return db.insert("produtos", null, cv);
-        }
-
-        ArrayList<String> getTodosNomesProdutos() {
-            ArrayList<String> res = new ArrayList<>();
-            SQLiteDatabase db = getReadableDatabase();
-            Cursor c = db.rawQuery("SELECT nome FROM produtos ORDER BY nome COLLATE NOCASE", null);
-            try {
-                while (c.moveToNext()) {
-                    res.add(c.getString(0));
-                }
-            } finally {
-                c.close();
-            }
-            return res;
-        }
-
-        int getEstoque(long produtoId) {
-            SQLiteDatabase db = getReadableDatabase();
-            Cursor c = db.rawQuery("SELECT estoque FROM produtos WHERE id = ?", new String[]{String.valueOf(produtoId)});
-            try {
-                if (c.moveToFirst()) {
-                    return c.getInt(0);
-                }
-            } finally {
-                c.close();
-            }
-            return 0;
-        }
-
-        boolean updateEstoqueProduto(long produtoId, int novoEstoque) {
-            SQLiteDatabase db = getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put("estoque", novoEstoque);
-            int updated = db.update("produtos", cv, "id = ?", new String[]{String.valueOf(produtoId)});
-            return updated > 0;
-        }
-
-        boolean insertMovimentacao(long produtoId, String produtoNome, String tipo, int quantidade, String data, String observacao) {
-            SQLiteDatabase db = getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put("produto_id", produtoId);
-            cv.put("produto_nome", produtoNome);
-            cv.put("tipo", tipo);
-            cv.put("quantidade", quantidade);
-            cv.put("data", data);
-            cv.put("observacao", observacao);
-            long id = db.insert("movimentacoes", null, cv);
-            return id != -1;
-        }
-    }
 }
