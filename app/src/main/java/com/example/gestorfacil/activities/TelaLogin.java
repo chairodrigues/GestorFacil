@@ -1,13 +1,10 @@
 package com.example.gestorfacil.activities;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,14 +23,8 @@ import com.example.gestorfacil.database.Usuario;
  */
 public class TelaLogin extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "gestor_prefs";
-    private static final String PREF_EMAIL = "user_email";
-    private static final String PREF_PASS = "user_pass";
-
     private EditText etEmail;
     private EditText etPassword;
-    private Button btnLogin;
-    private Button btnRegisterUser;
     private AppDatabase db;
 
     @Override
@@ -72,11 +63,11 @@ public class TelaLogin extends AppCompatActivity {
         etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         root.addView(etPassword, formLp());
 
-        btnLogin = new Button(this);
+        Button btnLogin = new Button(this);
         btnLogin.setText("Entrar");
         root.addView(btnLogin, formLp());
 
-        btnRegisterUser = new Button(this);
+        Button btnRegisterUser = new Button(this);
         btnRegisterUser.setText("Cadastrar usuário");
         root.addView(btnRegisterUser, formLp());
 
@@ -110,13 +101,28 @@ public class TelaLogin extends AppCompatActivity {
             return;
         }
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit()
-                .putString(PREF_EMAIL, email)
-                .putString(PREF_PASS, pass)
-                .apply();
+        // Derivar um nome simples a partir do e-mail se o usuário não informar
+        String nome = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
 
-        toast("Usuário cadastrado localmente. Use Entrar para acessar.");
+        new Thread(() -> {
+            // Verifica se já existe um usuário com este e-mail
+            Usuario existente = db.usuarioDao().getUsuarioByEmail(email);
+            if (existente != null) {
+                runOnUiThread(() -> toast("Esse e-mail já está cadastrado."));
+                return;
+            }
+
+            // Insere o novo usuário no banco
+            Usuario novo = new Usuario(nome, email, pass);
+            db.usuarioDao().insert(novo);
+
+            // Notifica a UI
+            runOnUiThread(() -> {
+                toast("Usuário cadastrado com sucesso. Use Entrar para acessar.");
+                etEmail.setText("");
+                etPassword.setText("");
+            });
+        }).start();
     }
 
     private void realizarLogin(String email, String senha){
@@ -173,8 +179,9 @@ public class TelaLogin extends AppCompatActivity {
 
         new Thread(() ->{
 
-            if(!db.usuarioDao().checkLoginExiste(email, senha)){
-
+            // Verifica por e-mail (checkLoginExiste tinha uma assinatura incorreta que retorna boolean para uma query que seleciona uma entidade)
+            Usuario existente = db.usuarioDao().getUsuarioByEmail(email);
+            if (existente == null) {
                 db.usuarioDao().insert(admin);
 
             }
